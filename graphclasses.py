@@ -613,7 +613,7 @@ if __name__ == '__main__':
     G.add_vertex(6)
     G.add_edge(6,5,4)
     G.add_edge(3,5,3)
-
+    G.shortest_cycle(2)
     # G.print_sorted()
     # H = Graph({1,4,5,6,7})
     # H.add_edge_from([(1,7), (7,5), (4,6), (2,7), (5,1), (6,5), (1,4)])
