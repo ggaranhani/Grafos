@@ -54,7 +54,7 @@ class Graph(object):
 
     def remove_edge(self, a, b, w=None):
         if a in self.graph and b in self.graph:
-            if len(self.graph[a][b]) > 1:
+            if w is not None:
                 self.graph[a][b].remove(w)
                 self.graph[b][a].remove(w)
             else:
@@ -485,20 +485,20 @@ class Graph(object):
         
         while vert != end:
             visited.add(vert)
-            weight_to_current_node = shortest_paths[vert][1]
+            vert_weight = shortest_paths[vert][1]
 
             for neighbour in self.graph[vert]:
-                weight = min(self.graph[vert][neighbour]) + weight_to_current_node
+                neig_weight = min(self.graph[vert][neighbour]) + vert_weight
                 if neighbour not in shortest_paths:
-                    shortest_paths[neighbour] = (vert, weight)
+                    shortest_paths[neighbour] = (vert, neig_weight)
                 else:
-                    if shortest_paths[neighbour][1] > weight:
-                        shortest_paths[neighbour] = (vert, weight)
+                    if shortest_paths[neighbour][1] > neig_weight:
+                        shortest_paths[neighbour] = (vert, neig_weight)
             
-            next_destinations = {node: shortest_paths[node] for node in shortest_paths if node not in visited}
-            if not next_destinations:
+            not_visited = {node: shortest_paths[node] for node in shortest_paths if node not in visited}
+            if not not_visited:
                 return(f"Path between {initial} and {end} does not exist")
-            vert = min(next_destinations, key=lambda k: next_destinations[k][1])
+            vert = min(not_visited, key=lambda k: not_visited[k][1])
         
         path = []
         weight = shortest_paths[vert][1]
@@ -508,6 +508,25 @@ class Graph(object):
 
         path = path[::-1]
         return path, weight
+
+    def shortest_cycle(self, initial):
+        distances = {}
+        paths = {}
+        for neighbour in list(self.graph[initial]):
+            weight = self.graph[initial][neighbour]
+            self.remove_edge(initial, neighbour)
+            try:
+                paths[neighbour], distances[neighbour] = self.dijkstra(neighbour, initial)
+                distances[neighbour] += min(weight)
+            except:
+                pass
+            for w in weight:
+                self.add_edge(initial, neighbour, w)        
+        try:
+            vert = min(distances, key=lambda k: distances[k])
+        except:
+            return(f"There is no possible cycle for vertex {initial}")
+        return paths[vert], distances[vert] 
 
     def eccentricity(self):
         ecc = 0
